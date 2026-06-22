@@ -1,0 +1,12 @@
+- generic [ref=e2]:
+  - generic [ref=e17]:
+    - button "Back to safety" [ref=e18] [cursor=pointer]
+    - button "Hide advanced" [expanded] [active] [ref=e20] [cursor=pointer]
+  - generic [ref=e21]:
+    - paragraph [ref=e22]:
+      - text: This server could not prove that it is
+      - strong [ref=e23]: wolt.com
+      - text: ; its security certificate is not trusted by your computer's operating system. This may be caused by a misconfiguration or an attacker intercepting your connection.
+    - paragraph [ref=e24]:
+      - link "Proceed to wolt.com (unsafe)" [ref=e25] [cursor=pointer]:
+        - /url: "#"

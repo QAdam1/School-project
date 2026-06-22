@@ -1,0 +1,18 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e5]:
+      - heading "Your connection is not private" [level=1] [ref=e6]
+      - paragraph [ref=e7]:
+        - text: Attackers might be trying to steal your information from
+        - strong [ref=e8]: wolt.com
+        - text: (for example, passwords, messages, or credit cards).
+        - link "Learn more about this warning" [ref=e9] [cursor=pointer]:
+          - /url: "#"
+      - button "net::ERR_CERT_AUTHORITY_INVALID" [ref=e11]
+    - generic [ref=e15]:
+      - link "Turn on enhanced protection" [ref=e16] [cursor=pointer]:
+        - /url: "#"
+      - text: to get Chrome's highest level of security
+  - generic [ref=e17]:
+    - button "Back to safety" [ref=e18] [cursor=pointer]
+    - button "Advanced" [ref=e19] [cursor=pointer]
