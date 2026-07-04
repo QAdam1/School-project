@@ -1,0 +1,45 @@
+name: Maccabi Appointment Check
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_date:
+        description: "Check for appointments on or before this date (YYYY-MM-DD)"
+        required: true
+        default: "2026-06-05"
+      exclude_doctor:
+        description: "Doctor name to exclude from results"
+        required: true
+        default: "שם טוב יוסף"
+
+jobs:
+  check-appointments:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run appointment check
+        env:
+          MACCABI_ID: ${{ secrets.MACCABI_ID }}
+          MACCABI_PASSWORD: ${{ secrets.MACCABI_PASSWORD }}
+          TARGET_DATE: ${{ github.event.inputs.target_date }}
+          EXCLUDE_DOCTOR: ${{ github.event.inputs.exclude_doctor }}
+        run: npm run check
+
+      - name: Upload debug artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: appointment-check-artifacts
+          path: artifacts/
+          retention-days: 7
