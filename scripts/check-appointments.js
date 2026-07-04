@@ -50,6 +50,30 @@ const SELECTORS = {
   nearestAppointmentOption: 'text=תור פנוי קרוב',
 };
 
+// Workflow artifacts (screenshots/HTML) live on GitHub's blob storage, which
+// this dev sandbox's network policy can't reach - so failures also dump a
+// structural inventory (no field values) straight to stdout/job logs, which
+// remain readable via the GitHub API regardless.
+async function dumpPageInventory(page) {
+  try {
+    const inventory = await page.$$eval('input, button, a, [role="button"]', (els) =>
+      els.slice(0, 100).map((el) => ({
+        tag: el.tagName.toLowerCase(),
+        type: el.getAttribute('type') || undefined,
+        name: el.getAttribute('name') || undefined,
+        id: el.id || undefined,
+        placeholder: el.getAttribute('placeholder') || undefined,
+        ariaLabel: el.getAttribute('aria-label') || undefined,
+        text: (el.textContent || '').trim().slice(0, 40) || undefined,
+      }))
+    );
+    console.log('PAGE_INVENTORY:', JSON.stringify(inventory));
+    console.log('PAGE_URL:', page.url());
+  } catch (err) {
+    console.error('Failed to dump page inventory:', err.message);
+  }
+}
+
 let stepCount = 0;
 async function step(page, name, fn) {
   stepCount += 1;
@@ -66,6 +90,7 @@ async function step(page, name, fn) {
       .content()
       .then((html) => fs.writeFileSync(path.join(ARTIFACTS_DIR, `${label}-ERROR.html`), html))
       .catch(() => {});
+    await dumpPageInventory(page);
     throw err;
   }
 }
@@ -110,6 +135,7 @@ async function main() {
     await step(page, 'Navigate to login page', () =>
       page.goto('https://mac.maccabi4u.co.il/login', { waitUntil: 'networkidle', timeout: 30000 })
     );
+    await dumpPageInventory(page);
 
     await step(page, 'Fill ID (first screen)', () =>
       fillFirstMatch(page, SELECTORS.loginIdInput, MACCABI_ID, 'login ID field')
@@ -149,6 +175,7 @@ async function main() {
     await step(page, 'Wait for appointment page load', () =>
       page.waitForLoadState('networkidle', { timeout: 30000 })
     );
+    await dumpPageInventory(page);
 
     await step(page, 'Click "חיפוש ואיתור שירותי בריאות"', () =>
       page.locator(SELECTORS.searchHealthServices).first().click()
