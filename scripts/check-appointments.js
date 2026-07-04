@@ -72,6 +72,10 @@ async function dumpPageInventory(page) {
     console.log('PAGE_TITLE:', await page.title());
     const bodyText = await page.locator('body').innerText().catch(() => '');
     console.log('PAGE_BODY_SNIPPET:', JSON.stringify(bodyText.slice(0, 800)));
+    const html = await page.content().catch(() => '');
+    console.log('HTML_LENGTH:', html.length);
+    console.log('HTML_SNIPPET:', JSON.stringify(html.slice(0, 1500)));
+    console.log('FRAMES:', JSON.stringify(page.frames().map((f) => f.url())));
   } catch (err) {
     console.error('Failed to dump page inventory:', err.message);
   }
@@ -130,8 +134,22 @@ function parseIsraeliDate(text) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext({ locale: 'he-IL', timezoneId: 'Asia/Jerusalem' });
+  const browser = await chromium.launch({
+    headless: true,
+    args: ['--disable-blink-features=AutomationControlled'],
+  });
+  const context = await browser.newContext({
+    locale: 'he-IL',
+    timezoneId: 'Asia/Jerusalem',
+    viewport: { width: 1366, height: 900 },
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+  });
+  // Headless Chromium exposes navigator.webdriver = true by default, a
+  // common signal anti-bot scripts use to silently block SPA rendering.
+  await context.addInitScript(() => {
+    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+  });
   const page = await context.newPage();
 
   try {
