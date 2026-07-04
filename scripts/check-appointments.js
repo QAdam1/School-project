@@ -69,6 +69,9 @@ async function dumpPageInventory(page) {
     );
     console.log('PAGE_INVENTORY:', JSON.stringify(inventory));
     console.log('PAGE_URL:', page.url());
+    console.log('PAGE_TITLE:', await page.title());
+    const bodyText = await page.locator('body').innerText().catch(() => '');
+    console.log('PAGE_BODY_SNIPPET:', JSON.stringify(bodyText.slice(0, 800)));
   } catch (err) {
     console.error('Failed to dump page inventory:', err.message);
   }
@@ -132,9 +135,10 @@ async function main() {
   const page = await context.newPage();
 
   try {
-    await step(page, 'Navigate to login page', () =>
+    const loginResponse = await step(page, 'Navigate to login page', () =>
       page.goto('https://mac.maccabi4u.co.il/login', { waitUntil: 'networkidle', timeout: 30000 })
     );
+    console.log('LOGIN_RESPONSE_STATUS:', loginResponse && loginResponse.status());
     await dumpPageInventory(page);
 
     await step(page, 'Fill ID (first screen)', () =>
